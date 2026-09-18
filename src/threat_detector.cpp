@@ -74,10 +74,10 @@ void ThreatDetector::push(ThreatLevel level, const std::string& category,
     ev.time = std::chrono::system_clock::now();
     latest_.push_back(ev);
     history_.push_back(ev);
-    if (history_.size() > 200) {
+    if (history_.size() > 100) {
         history_.erase(history_.begin(),
                        history_.begin() +
-                           static_cast<std::ptrdiff_t>(history_.size() - 200));
+                           static_cast<std::ptrdiff_t>(history_.size() - 100));
     }
 }
 
@@ -184,7 +184,7 @@ std::vector<ThreatEvent> ThreatDetector::evaluate(
         if (!seen) unique.push_back(ev);
     }
     latest_ = unique;
-    return latest_;
+    return unique;
 }
 
 }  // namespace ntrack
