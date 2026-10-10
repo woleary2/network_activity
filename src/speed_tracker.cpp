@@ -15,7 +15,7 @@
 namespace ntrack {
 namespace {
 
-bool is_interesting(const std::string& name) {
+bool is_interesting(const std::string_view name) {
     if (name.empty() || name == "lo0" || name.rfind("lo", 0) == 0) return false;
     // Skip virtual / tunnel interfaces that inflate noise by default.
     static const char* skip_prefixes[] = {
