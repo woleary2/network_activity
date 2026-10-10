@@ -113,13 +113,8 @@ std::vector<SpeedSnapshot> SpeedTracker::update() {
             }
         }
 
-        Sample sample;
-        sample.rx_bytes = iface.rx_bytes;
-        sample.tx_bytes = iface.tx_bytes;
-        sample.rx_packets = iface.rx_packets;
-        sample.tx_packets = iface.tx_packets;
-        sample.timestamp = now;
-        previous_[iface.name] = sample;
+        previous_[iface.name] = Sample { iface.rx_bytes, iface.tx_bytes, 
+                                iface.rx_packets, iface.tx_packets, now };
 
         totals_.download_bps += snap.download_bps;
         totals_.upload_bps += snap.upload_bps;
