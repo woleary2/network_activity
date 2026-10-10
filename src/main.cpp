@@ -22,12 +22,12 @@ void on_signal(int) { g_running = false; }
 
 struct Options {
     double interval_sec = 1.0;
-    bool once = false;
-    bool no_color = false;
     size_t max_connections = 12;
     size_t max_threats = 8;
     double upload_spike_mib = 5.0;
     double download_spike_mib = 50.0;
+    bool once = false;
+    bool no_color = false;
 };
 
 void print_usage(const char* argv0) {
@@ -91,8 +91,8 @@ std::string bar(double bps, double scale, int width, bool color_on,
                 const char* color) {
     if (scale <= 0) scale = 1;
     int filled = static_cast<int>((bps / scale) * width);
-    if (filled < 0) filled = 0;
-    if (filled > width) filled = width;
+    filled = std::max(filled, 0);
+    filled = std::min(filled, width);
     std::string s(filled, '|');
     s.append(static_cast<size_t>(width - filled), '.');
     return cwrap(color_on, color, s);
