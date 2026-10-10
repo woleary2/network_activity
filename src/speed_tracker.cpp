@@ -62,13 +62,12 @@ std::vector<InterfaceStats> SpeedTracker::collect_interfaces() {
             }
 
             if (is_interesting(name)) {
-                InterfaceStats st;
-                st.name = name;
-                st.rx_bytes = if2->ifm_data.ifi_ibytes;
-                st.tx_bytes = if2->ifm_data.ifi_obytes;
-                st.rx_packets = if2->ifm_data.ifi_ipackets;
-                st.tx_packets = if2->ifm_data.ifi_opackets;
-                st.is_up = (if2->ifm_flags & IFF_UP) != 0;
+                InterfaceStats st { name, if2->ifm_data.ifi_ibytes, 
+                                    if2->ifm_data.ifi_obytes, if2->ifm_data.ifi_ipackets,
+                                    if2->ifm_data.ifi_opackets,
+                                    ((if2->ifm_flags & IFF_UP) != 0)
+                                  };
+
                 // Skip never-used virtual/bridge ports.
                 if (st.rx_bytes == 0 && st.tx_bytes == 0) {
                     next += ifm->ifm_msglen;
@@ -91,21 +90,19 @@ std::vector<SpeedSnapshot> SpeedTracker::update() {
     totals_.interface = "TOTAL";
 
     for (const auto& iface : interfaces) {
-        SpeedSnapshot snap;
-        snap.interface = iface.name;
-        snap.total_rx = iface.rx_bytes;
-        snap.total_tx = iface.tx_bytes;
-        snap.is_up = iface.is_up;
+        SpeedSnapshot snap { iface.name, static_cast<double>(iface.rx_bytes), 
+                        static_cast<double>(iface.tx_bytes), iface.is_up };
 
         auto it = previous_.find(iface.name);
         if (it != previous_.end()) {
             const double dt =
                 std::chrono::duration<double>(now - it->second.timestamp).count();
             if (dt > 0.0) {
-                const auto drx = iface.rx_bytes >= it->second.rx_bytes
+                const uint64_t drx = iface.rx_bytes >= it->second.rx_bytes
                                      ? iface.rx_bytes - it->second.rx_bytes
                                      : 0;
-                const auto dtx = iface.tx_bytes >= it->second.tx_bytes
+
+                const uint64_t dtx = iface.tx_bytes >= it->second.tx_bytes
                                      ? iface.tx_bytes - it->second.tx_bytes
                                      : 0;
                 snap.download_bps = static_cast<double>(drx) / dt;
