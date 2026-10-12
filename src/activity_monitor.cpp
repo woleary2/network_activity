@@ -173,8 +173,9 @@ std::vector<Connection> parse_netstat(const std::string& text, Proto proto) {
         c.proto = proto;
         c.process = "?";
         c.pid = -1;
-        if (!split_dot_port(local, c.local_addr, c.local_port)) continue;
-        if (!split_dot_port(foreign, c.remote_addr, c.remote_port)) continue;
+        if (!(split_dot_port(local, c.local_addr, c.local_port) ||
+            split_dot_port(foreign, c.remote_addr, c.remote_port))) continue;
+
         if (proto == Proto::Tcp) {
             c.state = state.empty() ? "UNKNOWN" : state;
         } else {
@@ -191,7 +192,7 @@ std::string ActivityMonitor::resolve_process(int /*pid*/) { return "?"; }
 
 std::vector<Connection> ActivityMonitor::list_tcp() {
     // ESTABLISHED + LISTEN cover the interesting activity surface.
-    auto text = run_cmd("lsof -nP -iTCP -sTCP:ESTABLISHED,LISTEN 2>/dev/null");
+    std::string text = run_cmd("lsof -nP -iTCP -sTCP:ESTABLISHED,LISTEN 2>/dev/null");
     if (!text.empty() && text.find("COMMAND") != std::string::npos) {
         return parse_lsof(text, Proto::Tcp);
     }
@@ -200,9 +201,9 @@ std::vector<Connection> ActivityMonitor::list_tcp() {
 }
 
 std::vector<Connection> ActivityMonitor::list_udp() {
-    auto text = run_cmd("lsof -nP -iUDP 2>/dev/null");
+    std::string text = run_cmd("lsof -nP -iUDP 2>/dev/null");
     if (!text.empty() && text.find("COMMAND") != std::string::npos) {
-        auto all = parse_lsof(text, Proto::Udp);
+        std::vector<Connection> all = parse_lsof(text, Proto::Udp);
         // UDP listen table is huge; keep connected or named local ports.
         std::vector<Connection> filtered;
         for (auto& c : all) {
@@ -214,15 +215,15 @@ std::vector<Connection> ActivityMonitor::list_udp() {
         return filtered;
     }
     text = run_cmd("netstat -an -p udp 2>/dev/null");
-    auto all = parse_netstat(text, Proto::Udp);
+    std::vector<Connection> all = parse_netstat(text, Proto::Udp);
     if (all.size() > 40) all.resize(40);
     return all;
 }
 
 ActivitySummary ActivityMonitor::snapshot() {
     ActivitySummary summary;
-    auto tcp = list_tcp();
-    auto udp = list_udp();
+    std::vector<Connection> tcp = list_tcp();
+    std::vector<Connection> udp = list_udp();
 
     summary.tcp_total = tcp.size();
     summary.udp_total = udp.size();
