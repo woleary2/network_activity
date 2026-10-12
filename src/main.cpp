@@ -269,7 +269,7 @@ int main(int argc, char** argv) {
             std::cerr << "Activity sample failed: " << ex.what() << "\n";
         }
 
-        auto events = threats.evaluate(speeds.totals(), act);
+        std::vector<ntrack::ThreatEvent> events = threats.evaluate(speeds.totals(), act);
         const auto uptime = std::chrono::duration_cast<std::chrono::seconds>(
             std::chrono::steady_clock::now() - started);
 

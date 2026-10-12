@@ -83,7 +83,7 @@ std::vector<InterfaceStats> SpeedTracker::collect_interfaces() {
 
 std::vector<SpeedSnapshot> SpeedTracker::update() {
     const auto now = std::chrono::steady_clock::now();
-    auto interfaces = collect_interfaces();
+    std::vector<ntrack::InterfaceStats> interfaces = collect_interfaces();
     std::vector<SpeedSnapshot> snaps;
 
     totals_ = SpeedSnapshot{};
