@@ -91,7 +91,9 @@ std::vector<SpeedSnapshot> SpeedTracker::update() {
 
     for (const auto& iface : interfaces) {
         SpeedSnapshot snap { iface.name, static_cast<double>(iface.rx_bytes), 
-                        static_cast<double>(iface.tx_bytes), iface.is_up };
+                        static_cast<double>(iface.tx_bytes) };
+        
+        snap.is_up = iface.is_up;
 
         auto it = previous_.find(iface.name);
         if (it != previous_.end()) {

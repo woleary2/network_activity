@@ -67,7 +67,8 @@ const char* ThreatDetector::level_color(ThreatLevel level) {
 
 void ThreatDetector::push(ThreatLevel level, const std::string& category,
                           const std::string& message) {
-    const ThreatEvent ev { level, category, message, std::chrono::system_clock::now() };
+    const ThreatEvent ev { level, category, message, 
+                            std::chrono::system_clock::now() };
 
     latest_.push_back(ev);
     history_.push_back(ev);
