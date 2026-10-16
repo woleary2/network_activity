@@ -46,11 +46,11 @@ std::vector<InterfaceStats> SpeedTracker::collect_interfaces() {
     char* end = buf.data() + len;
 
     while (next < end) {
-        auto* ifm = reinterpret_cast<if_msghdr*>(next);
+        if_msghdr* ifm = reinterpret_cast<if_msghdr*>(next);
         if (ifm->ifm_msglen == 0) break;
         if (ifm->ifm_type == RTM_IFINFO2) {
-            auto* if2 = reinterpret_cast<if_msghdr2*>(next);
-            auto* sdl = reinterpret_cast<sockaddr_dl*>(if2 + 1);
+            if_msghdr2* if2 = reinterpret_cast<if_msghdr2*>(next);
+            sockaddr_dl* sdl = reinterpret_cast<sockaddr_dl*>(if2 + 1);
 
             std::string name;
             if (sdl->sdl_nlen > 0) {
