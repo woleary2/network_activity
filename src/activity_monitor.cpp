@@ -31,14 +31,14 @@ bool parse_endpoint(const std::string& ep, std::string& addr, uint16_t& port) {
         return true;
     }
     if (!ep.empty() && ep.front() == '[') {
-        auto close = ep.find(']');
+        size_t close = ep.find(']');
         if (close == std::string::npos) return false;
         addr = ep.substr(1, close - 1);
         if (close + 1 >= ep.size() || ep[close + 1] != ':') return false;
         port = static_cast<uint16_t>(std::stoul(ep.substr(close + 2)));
         return true;
     }
-    auto pos = ep.rfind(':');
+    size_t pos = ep.rfind(':');
     if (pos == std::string::npos) return false;
     addr = ep.substr(0, pos);
     if (addr == "*") {
@@ -59,7 +59,7 @@ bool parse_endpoint(const std::string& ep, std::string& addr, uint16_t& port) {
 bool parse_lsof_name(const std::string& name, std::string& local_addr,
                      uint16_t& local_port, std::string& remote_addr,
                      uint16_t& remote_port) {
-    auto arrow = name.find("->");
+    size_t arrow = name.find("->");
     std::string left = (arrow == std::string::npos) ? name : name.substr(0, arrow);
     std::string right =
         (arrow == std::string::npos) ? "" : name.substr(arrow + 2);
