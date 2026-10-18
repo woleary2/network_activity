@@ -204,7 +204,7 @@ std::vector<Connection> ActivityMonitor::list_udp() {
         std::vector<Connection> all = parse_lsof(text, Proto::Udp);
         // UDP listen table is huge; keep connected or named local ports.
         std::vector<Connection> filtered;
-        for (ntrack::Connection& c : all) {
+        for (Connection& c : all) {
             if (c.remote_port != 0 || c.local_port != 0) {
                 filtered.push_back(std::move(c));
             }
@@ -228,7 +228,7 @@ ActivitySummary ActivityMonitor::snapshot() {
     summary.connections.reserve(tcp.size() + udp.size());
 
     std::set<std::string> remotes;
-    for (auto& c : tcp) {
+    for (Connection& c : tcp) {
         if (c.state == "ESTABLISHED") ++summary.established;
         if (c.state == "LISTEN") ++summary.listening;
         if (!c.remote_addr.empty() && c.remote_addr != "*" &&
@@ -238,7 +238,7 @@ ActivitySummary ActivityMonitor::snapshot() {
         }
         summary.connections.push_back(std::move(c));
     }
-    for (auto& c : udp) {
+    for (Connection& c : udp) {
         if (!c.remote_addr.empty() && c.remote_addr != "*" &&
             c.remote_addr != "0.0.0.0" && c.remote_addr != "::" &&
             c.remote_port != 0) {
