@@ -61,8 +61,7 @@ bool parse_lsof_name(const std::string& name, std::string& local_addr,
                      uint16_t& remote_port) {
     size_t arrow = name.find("->");
     std::string left = (arrow == std::string::npos) ? name : name.substr(0, arrow);
-    std::string right =
-        (arrow == std::string::npos) ? "" : name.substr(arrow + 2);
+    std::string right = (arrow == std::string::npos) ? "" : name.substr(arrow + 2);
     if (!parse_endpoint(left, local_addr, local_port)) return false;
     if (right.empty()) {
         remote_addr = "*";
@@ -73,10 +72,9 @@ bool parse_lsof_name(const std::string& name, std::string& local_addr,
 }
 
 std::string extract_state(const std::string& name) {
-    auto open = name.rfind('(');
-    auto close = name.rfind(')');
-    if (open != std::string::npos && close != std::string::npos &&
-        close > open) {
+    size_t open = name.rfind('(');
+    size_t close = name.rfind(')');
+    if (open != std::string::npos && close != std::string::npos && close > open) {
         return name.substr(open + 1, close - open - 1);
     }
     return "";
@@ -107,7 +105,7 @@ std::vector<Connection> parse_lsof(const std::string& text, Proto proto) {
 
         std::string state = extract_state(name);
         std::string name_core = name;
-        auto paren = name_core.rfind(" (");
+        size_t paren = name_core.rfind(" (");
         if (paren != std::string::npos) name_core = name_core.substr(0, paren);
 
         Connection c;
@@ -149,7 +147,7 @@ std::vector<Connection> parse_netstat(const std::string& text, Proto proto) {
                                  uint16_t& port) {
             if (!ep.empty() && ep.front() == '*') {
                 // *.443 or *.*
-                auto dot = ep.rfind('.');
+                size_t dot = ep.rfind('.');
                 addr = "*";
                 if (dot == std::string::npos || ep.substr(dot + 1) == "*") {
                     port = 0;
@@ -158,7 +156,7 @@ std::vector<Connection> parse_netstat(const std::string& text, Proto proto) {
                 }
                 return true;
             }
-            auto dot = ep.rfind('.');
+            size_t dot = ep.rfind('.');
             if (dot == std::string::npos) return false;
             addr = ep.substr(0, dot);
             try {
@@ -206,7 +204,7 @@ std::vector<Connection> ActivityMonitor::list_udp() {
         std::vector<Connection> all = parse_lsof(text, Proto::Udp);
         // UDP listen table is huge; keep connected or named local ports.
         std::vector<Connection> filtered;
-        for (auto& c : all) {
+        for (ntrack::Connection& c : all) {
             if (c.remote_port != 0 || c.local_port != 0) {
                 filtered.push_back(std::move(c));
             }
